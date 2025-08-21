@@ -14,8 +14,7 @@ struct ContentView: View {
     
     var body: some View {
         ZStack {
-            // Background gradient
-            backgroundGradient
+            colorScheme == .dark ? Color("BackgroundDark") : Color("BackgroundLight")
             
             VStack(spacing: 0) {
                 // Search section
@@ -53,8 +52,8 @@ struct ContentView: View {
     
     // MARK: - Background Gradient
     private var backgroundGradient: some View {
-        let defaultLight = [Color.blue, Color.purple]
-        let defaultDark = [Color(.systemIndigo), Color(.black)]
+        let defaultLight = [Color("BackgroundStartLight"), Color("BackgroundEndLight")].compactMap { $0 }
+        let defaultDark = [Color("BackgroundStartDark"), Color("BackgroundEndDark")].compactMap { $0 }
         let colors = viewModel.gradientColors.isEmpty ? (colorScheme == .dark ? defaultDark : defaultLight) : viewModel.gradientColors
         return LinearGradient(
             colors: colors,
@@ -69,23 +68,26 @@ struct ContentView: View {
             // App title
             Text("Weather App")
                 .font(.system(size: 32, weight: .bold))
-                .foregroundColor(.white)
-                .shadow(color: .black.opacity(0.3), radius: 2, x: 0, y: 1)
+                .foregroundColor(Color("TextPrimary"))
+                .shadow(color: Color("PrimaryShadow"), radius: 2, x: 0, y: 1)
             
             // Search bar
             HStack {
                 Image(systemName: "magnifyingglass")
-                    .foregroundColor(.white.opacity(0.7))
+                    .foregroundColor(Color("TextSecondary"))
                     .font(.system(size: 18))
                 
                 TextField("Enter city name...", text: $viewModel.searchText)
                     .textFieldStyle(PlainTextFieldStyle())
                     .font(.system(size: 16))
-                    .foregroundColor(.white)
+                    .foregroundColor(Color("TextPrimary"))
                     .onSubmit {
                         Task {
                             await viewModel.searchWeather()
                         }
+                    }
+                    .onChange(of: viewModel.searchText) { newValue in
+                        viewModel.onSearchTextChanged(newValue)
                     }
                 
                 if !viewModel.searchText.isEmpty {
@@ -93,7 +95,7 @@ struct ContentView: View {
                         viewModel.searchText = ""
                     }) {
                         Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(.white.opacity(0.7))
+                            .foregroundColor(Color("TextSecondary"))
                             .font(.system(size: 18))
                     }
                 }
@@ -102,12 +104,47 @@ struct ContentView: View {
             .padding(.vertical, 12)
             .background(
                 RoundedRectangle(cornerRadius: 25)
-                    .fill(Color.white.opacity(0.2))
+                    .fill(Color("CardBackground"))
                     .background(
                         RoundedRectangle(cornerRadius: 25)
-                            .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                            .stroke(Color("StrokeColor"), lineWidth: 1)
                     )
             )
+            // Suggestions dropdown
+            if viewModel.isShowingSuggestions {
+                VStack(alignment: .leading, spacing: 0) {
+                    ForEach(viewModel.citySuggestions) { city in
+                        Button {
+                            viewModel.selectCity(city)
+                        } label: {
+                            HStack {
+                                Image(systemName: "mappin.and.ellipse")
+                                    .foregroundColor(Color("IconTint"))
+                                Text(city.displayName)
+                                    .foregroundColor(Color("TextPrimary"))
+                                    .font(.system(size: 16))
+                                Spacer()
+                            }
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 10)
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        if city.id != viewModel.citySuggestions.last?.id {
+                            Divider()
+                                .background(Color("StrokeColor"))
+                        }
+                    }
+                }
+                .background(
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(Color("CardBackground"))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(Color("StrokeColor"), lineWidth: 1)
+                        )
+                )
+            }
             
             // Search button
             Button(action: {
@@ -117,15 +154,15 @@ struct ContentView: View {
             }) {
                 Text("Search")
                     .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(.white)
+                    .foregroundColor(Color("TextPrimary"))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
                     .background(
                         RoundedRectangle(cornerRadius: 25)
-                            .fill(Color.white.opacity(0.2))
+                            .fill(Color("CardBackground"))
                             .background(
                                 RoundedRectangle(cornerRadius: 25)
-                                    .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                                    .stroke(Color("StrokeColor"), lineWidth: 1)
                             )
                     )
             }
@@ -142,12 +179,12 @@ struct ContentView: View {
             
             Text("Welcome to Weather App")
                 .font(.system(size: 28, weight: .bold))
-                .foregroundColor(.white)
+                .foregroundColor(Color("TextPrimary"))
                 .multilineTextAlignment(.center)
             
             Text("Enter a city name above to get current weather and 5-day forecast")
                 .font(.system(size: 16, weight: .regular))
-                .foregroundColor(.white.opacity(0.8))
+                .foregroundColor(Color("TextSecondary"))
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 20)
             
@@ -157,12 +194,12 @@ struct ContentView: View {
             }) {
                 Text("Try Demo Data")
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.white.opacity(0.8))
+                    .foregroundColor(Color("TextSecondary"))
                     .padding(.horizontal, 20)
                     .padding(.vertical, 8)
                     .background(
                         RoundedRectangle(cornerRadius: 20)
-                            .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                            .stroke(Color("StrokeColor"), lineWidth: 1)
                     )
             }
         }
@@ -195,11 +232,11 @@ struct ContentView: View {
             VStack(spacing: 4) {
                 Text(weather.name)
                     .font(.system(size: 32, weight: .bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(Color("TextPrimary"))
                 
                 Text(weather.sys.country)
                     .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.white.opacity(0.8))
+                    .foregroundColor(Color("TextSecondary"))
             }
             
             // Weather icon and temperature
@@ -212,27 +249,27 @@ struct ContentView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(viewModel.formatTemperature(weather.main.temp))
                         .font(.system(size: 48, weight: .bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(Color("TextPrimary"))
                     
                     Text(weather.weather.first?.description.capitalized ?? "")
                         .font(.system(size: 18, weight: .medium))
-                        .foregroundColor(.white.opacity(0.8))
+                        .foregroundColor(Color("TextSecondary"))
                 }
             }
             
             // Feels like
             Text("Feels like \(viewModel.formatTemperature(weather.main.feelsLike))")
                 .font(.system(size: 16, weight: .regular))
-                .foregroundColor(.white.opacity(0.7))
+                .foregroundColor(Color("TextSecondary"))
         }
         .padding(.vertical, 20)
         .padding(.horizontal, 30)
         .background(
             RoundedRectangle(cornerRadius: 20)
-                .fill(Color.white.opacity(0.1))
+                .fill(Color("CardBackground"))
                 .background(
                     RoundedRectangle(cornerRadius: 20)
-                        .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                        .stroke(Color("StrokeColor"), lineWidth: 1)
                 )
         )
     }
@@ -242,7 +279,7 @@ struct ContentView: View {
         VStack(spacing: 16) {
             Text("Weather Details")
                 .font(.system(size: 20, weight: .semibold))
-                .foregroundColor(.white)
+                .foregroundColor(Color("TextPrimary"))
                 .frame(maxWidth: .infinity, alignment: .leading)
             
             LazyVGrid(columns: [
@@ -278,10 +315,10 @@ struct ContentView: View {
         .padding(.horizontal, 30)
         .background(
             RoundedRectangle(cornerRadius: 20)
-                .fill(Color.white.opacity(0.1))
+                .fill(Color("CardBackground"))
                 .background(
                     RoundedRectangle(cornerRadius: 20)
-                        .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                        .stroke(Color("StrokeColor"), lineWidth: 1)
                 )
         )
     }
@@ -291,21 +328,21 @@ struct ContentView: View {
         VStack(spacing: 8) {
             Image(systemName: icon)
                 .font(.system(size: 24))
-                .foregroundColor(.white.opacity(0.8))
+                .foregroundColor(Color("IconTint"))
             
             Text(title)
                 .font(.system(size: 12, weight: .medium))
-                .foregroundColor(.white.opacity(0.7))
+                .foregroundColor(Color("TextSecondary"))
             
             Text(value)
                 .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(.white)
+                .foregroundColor(Color("TextPrimary"))
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 16)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color.white.opacity(0.1))
+                .fill(Color("CardBackground"))
         )
     }
     
@@ -314,7 +351,7 @@ struct ContentView: View {
         VStack(spacing: 16) {
             Text("5-Day Forecast")
                 .font(.system(size: 20, weight: .semibold))
-                .foregroundColor(.white)
+                .foregroundColor(Color("TextPrimary"))
                 .frame(maxWidth: .infinity, alignment: .leading)
             
             ScrollView(.horizontal, showsIndicators: false) {
@@ -333,10 +370,10 @@ struct ContentView: View {
         .padding(.horizontal, 30)
         .background(
             RoundedRectangle(cornerRadius: 20)
-                .fill(Color.white.opacity(0.1))
+                .fill(Color("CardBackground"))
                 .background(
                     RoundedRectangle(cornerRadius: 20)
-                        .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                        .stroke(Color("StrokeColor"), lineWidth: 1)
                 )
         )
     }

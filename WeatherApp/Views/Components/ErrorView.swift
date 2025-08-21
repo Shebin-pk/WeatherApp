@@ -16,19 +16,19 @@ struct ErrorView: View {
             // Error icon
             Image(systemName: "exclamationmark.triangle.fill")
                 .font(.system(size: 50))
-                .foregroundColor(.white)
-                .shadow(color: .black.opacity(0.3), radius: 2, x: 0, y: 1)
+                .foregroundColor(Color("IconTint"))
+                .shadow(color: Color("PrimaryShadow"), radius: 2, x: 0, y: 1)
             
             // Error title
             Text("Oops! Something went wrong")
                 .font(.system(size: 24, weight: .bold))
-                .foregroundColor(.white)
+                .foregroundColor(Color("TextPrimary"))
                 .multilineTextAlignment(.center)
             
             // Error message
             Text(errorMessage)
                 .font(.system(size: 16, weight: .regular))
-                .foregroundColor(.white.opacity(0.8))
+                .foregroundColor(Color("TextSecondary"))
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 20)
             
@@ -37,18 +37,19 @@ struct ErrorView: View {
                 HStack(spacing: 8) {
                     Image(systemName: "arrow.clockwise")
                         .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(Color("TextPrimary"))
                     Text("Try Again")
                         .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(Color("TextPrimary"))
                 }
-                .foregroundColor(.white)
                 .padding(.horizontal, 24)
                 .padding(.vertical, 12)
                 .background(
                     RoundedRectangle(cornerRadius: 25)
-                        .fill(Color.white.opacity(0.2))
+                        .fill(Color("CardBackground"))
                         .background(
                             RoundedRectangle(cornerRadius: 25)
-                                .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                                .stroke(Color("StrokeColor"), lineWidth: 1)
                         )
                 )
             }
@@ -57,13 +58,13 @@ struct ErrorView: View {
         .padding(30)
         .background(
             RoundedRectangle(cornerRadius: 20)
-                .fill(Color.black.opacity(0.3))
+                .fill(Color("CardBackground"))
                 .background(
                     RoundedRectangle(cornerRadius: 20)
-                        .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                        .stroke(Color("StrokeColor"), lineWidth: 1)
                 )
         )
-        .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 5)
+        .shadow(color: Color("PrimaryShadow").opacity(0.66), radius: 10, x: 0, y: 5)
     }
 }
 

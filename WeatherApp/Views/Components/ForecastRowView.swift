@@ -16,7 +16,7 @@ struct ForecastRowView: View {
             // Day name
             Text(forecastItem.dayName)
                 .font(.system(size: 14, weight: .medium))
-                .foregroundColor(.white)
+                .foregroundColor(Color("TextPrimary"))
                 .lineLimit(1)
             
             // Weather icon
@@ -28,12 +28,12 @@ struct ForecastRowView: View {
             // Temperature
             Text(viewModel.formatTemperature(forecastItem.main.temp))
                 .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(.white)
+                .foregroundColor(Color("TextPrimary"))
             
             // Weather description
             Text(forecastItem.weather.first?.description.capitalized ?? "")
                 .font(.system(size: 12, weight: .regular))
-                .foregroundColor(.white.opacity(0.8))
+                .foregroundColor(Color("TextSecondary"))
                 .lineLimit(2)
                 .multilineTextAlignment(.center)
         }
@@ -41,13 +41,13 @@ struct ForecastRowView: View {
         .padding(.vertical, 8)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color.white.opacity(0.2))
+                .fill(Color("CardBackground"))
                 .background(
                     RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                        .stroke(Color("StrokeColor"), lineWidth: 1)
                 )
         )
-        .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+        .shadow(color: Color("PrimaryShadow").opacity(0.33), radius: 4, x: 0, y: 2)
     }
 }
 

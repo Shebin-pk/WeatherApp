@@ -16,8 +16,8 @@ struct WeatherIconView: View {
     var body: some View {
         Image(systemName: weatherType.iconName)
             .font(.system(size: size))
-            .foregroundColor(.white)
-            .shadow(color: .black.opacity(0.3), radius: 2, x: 0, y: 1)
+            .foregroundColor(Color("IconTint"))
+            .shadow(color: Color("PrimaryShadow"), radius: 2, x: 0, y: 1)
             .scaleEffect(isAnimating ? 1.1 : 1.0)
             .rotationEffect(.degrees(rotationAngle))
             .offset(x: horizontalOffset, y: verticalOffset)

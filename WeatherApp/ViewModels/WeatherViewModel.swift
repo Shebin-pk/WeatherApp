@@ -15,6 +15,10 @@ class WeatherViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published var searchText = ""
+    @Published var citySuggestions: [City] = []
+    @Published var isShowingSuggestions: Bool = false
+    
+    private var debounceTask: Task<Void, Never>? = nil
     
     private let weatherService = WeatherService.shared
     
@@ -41,6 +45,40 @@ class WeatherViewModel: ObservableObject {
         }
         
         isLoading = false
+    }
+    
+    // MARK: - Suggest Cities (Debounced)
+    func onSearchTextChanged(_ text: String) {
+        debounceTask?.cancel()
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
+            citySuggestions = []
+            isShowingSuggestions = false
+            return
+        }
+        debounceTask = Task { [weak self] in
+            try? await Task.sleep(nanoseconds: 300_000_000) // 300ms
+            await self?.fetchCitySuggestions(query: trimmed)
+        }
+    }
+    
+    @MainActor
+    private func fetchCitySuggestions(query: String) async {
+        do {
+            let results = try await weatherService.searchCities(query, limit: 8)
+            self.citySuggestions = results
+            self.isShowingSuggestions = !results.isEmpty
+        } catch {
+            self.citySuggestions = []
+            self.isShowingSuggestions = false
+        }
+    }
+    
+    // MARK: - Select City from Suggestions
+    func selectCity(_ city: City) {
+        searchText = city.name
+        isShowingSuggestions = false
+        Task { await searchWeather() }
     }
     
     // MARK: - Load Mock Data for Testing

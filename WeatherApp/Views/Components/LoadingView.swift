@@ -16,7 +16,7 @@ struct LoadingView: View {
             Circle()
                 .fill(
                     LinearGradient(
-                        colors: [Color.white.opacity(0.3), Color.white.opacity(0.1)],
+                        colors: [Color("CardBackground").opacity(0.6), Color("CardBackground").opacity(0.3)],
                         startPoint: isAnimating ? .topLeading : .bottomTrailing,
                         endPoint: isAnimating ? .bottomTrailing : .topLeading
                     )
@@ -32,7 +32,7 @@ struct LoadingView: View {
             // Loading text
             Text("Loading weather data...")
                 .font(.system(size: 18, weight: .medium))
-                .foregroundColor(.white)
+                .foregroundColor(Color("TextPrimary"))
                 .opacity(isAnimating ? 0.7 : 1.0)
                 .animation(
                     Animation.easeInOut(duration: 1.0)
@@ -47,9 +47,9 @@ struct LoadingView: View {
                         .fill(
                             LinearGradient(
                                 colors: [
-                                    Color.white.opacity(0.2),
-                                    Color.white.opacity(0.1),
-                                    Color.white.opacity(0.2)
+                                    Color("CardBackground").opacity(0.9),
+                                    Color("CardBackground").opacity(0.6),
+                                    Color("CardBackground").opacity(0.9)
                                 ],
                                 startPoint: isAnimating ? .leading : .trailing,
                                 endPoint: isAnimating ? .trailing : .leading

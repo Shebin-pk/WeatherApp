@@ -36,9 +36,34 @@ class WeatherService {
     static let shared = WeatherService()
     
     private let baseURL = "https://api.openweathermap.org/data/2.5"
-    private let apiKey = "e0a4cf14f4f7bdf82f9379373b10139a" // Replace with your OpenWeatherMap API key
+    private let geoURL = "https://api.openweathermap.org/geo/1.0"
+    private let apiKey = "YOUR_API_KEY_HERE" // Replace with your OpenWeatherMap API key 
     
     private init() {}
+
+    // MARK: - Geocoding (City Suggestions)
+    func searchCities(_ query: String, limit: Int = 5) async throws -> [City] {
+        let encoded = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? query
+        let urlString = "\(geoURL)/direct?q=\(encoded)&limit=\(limit)&appid=\(apiKey)"
+        guard let url = URL(string: urlString) else { throw WeatherServiceError.invalidURL }
+        do {
+            let (data, response) = try await URLSession.shared.data(from: url)
+            guard let http = response as? HTTPURLResponse else { throw WeatherServiceError.invalidResponse }
+            switch http.statusCode {
+            case 200:
+                let result = try JSONDecoder().decode([City].self, from: data)
+                return result
+            case 401:
+                throw WeatherServiceError.networkError(NSError(domain: "API", code: 401, userInfo: [NSLocalizedDescriptionKey: "API key is invalid or not activated. Please check your OpenWeatherMap API key."]))
+            default:
+                throw WeatherServiceError.networkError(NSError(domain: "API", code: http.statusCode, userInfo: [NSLocalizedDescriptionKey: "HTTP Error: \(http.statusCode)"]))
+            }
+        } catch let e as WeatherServiceError {
+            throw e
+        } catch {
+            throw WeatherServiceError.networkError(error)
+        }
+    }
     
     // MARK: - Fetch Current Weather
     func fetchWeather(for city: String) async throws -> WeatherResponse {
